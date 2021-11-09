@@ -1,7 +1,20 @@
 const express = require('express');
 const app = express();
 const PORT = 8080;
+const bodyParser = require("body-parser");
+app.use(bodyParser.urlencoded({extended: true}));
 
+function generateRandomString() {
+	const possibleCharsStr = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+	const charArr = possibleCharsStr.split('');
+	let randomString = '';
+	
+	for (let i = 0; i <= 6; i++) {
+		randomString += charArr[Math.floor(Math.random() * charArr.length)];
+	}
+	return randomString;
+}
+generateRandomString()
 app.set('view engine', 'ejs');
 
 const urlDatabase = {
@@ -33,6 +46,11 @@ app.get('/urls/new', (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render("urls_show", templateVars);
+});
+
+app.post("/urls", (req, res) => {
+  console.log(req.body);  // Log the POST request body to the console
+  res.send("Ok");         // Respond with 'Ok' (we will replace this)
 });
 
 app.listen(PORT, () => {
