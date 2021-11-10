@@ -49,11 +49,15 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
 	const longURL = req.body['longURL']
 	const shortURL = generateRandomString();
 	urlDatabase[shortURL] = longURL;
   res.redirect(`/urls/${shortURL}`);
+});
+
+app.post('/urls/:shortURL/delete', (req, res) => {
+	delete urlDatabase[req.params.shortURL];
+	res.redirect('/urls');
 });
 
 app.listen(PORT, () => {
