@@ -9,6 +9,8 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.set('view engine', 'ejs');
 
 
+////// HELPER FUNCTIONS //////
+
 const generateRandomString = () => {
   const possibleCharsStr = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   const charArr = possibleCharsStr.split('');
@@ -19,6 +21,18 @@ const generateRandomString = () => {
   }
   return randomString;
 };
+
+const checkForUserByEmail = email => {
+  for (const userId in users) {
+    const user = users[userId];
+    if(user.email === email) {
+      return user;
+    }
+  }
+  return null;
+};
+
+////// DATA //////
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -112,19 +126,30 @@ app.post('/login', (req, res) => {
 });
 
 app.post('/logout', (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('user_id');
   res.redirect('/urls');
 });
 
 app.post('/register', (req, res) => {
   const user_id = generateRandomString();
-  
+  const email = req.body.email;
+  const password = req.body.password;
+  if (!email || !password) {
+   return res.status(400).send('email and password cannot be blank');
+  } 
+  const user = checkForUserByEmail(email);
+
+  if (user) {
+    return res.status(400).send('This user already exists. Please log in');
+  }
+
   users[user_id] = {
     user_id,
-    email: req.body.email,
-    password: req.body.password
+    email,
+    password
   }
   res.cookie('user_id', user_id);
+  
   res.redirect('/urls');
 });
 
