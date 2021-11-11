@@ -48,7 +48,7 @@ const users = {
  "user2RandomID": {
     id: "user2RandomID", 
     email: "user2@example.com", 
-    password: "dishwasher-funk"
+    password: "1234"
   }
 }
 
@@ -95,7 +95,14 @@ app.get('/register', (req, res) => {
   const templateVars = {
     user: users[req.cookies["user_id"]]
   }
-  res.render('url_register', templateVars);
+  res.render('user_register', templateVars);
+});
+
+app.get('/login', (req, res) => {
+  const templateVars = {
+    user: users[req.cookies["user_id"]]
+  }
+  res.render('user_login', templateVars);
 });
 
 
@@ -120,8 +127,25 @@ app.post('/urls/:shortURL/edit', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-  const username = req.body.username;
-  res.cookie('username', username);
+  const email = req.body.email;
+  const password = req.body.password;
+  if (!email || !password) {
+    return res.status(400).send('email and password cannot be blank');
+  }
+  
+  const user = checkForUserByEmail(email);
+  
+  
+  if (!user) {
+    return res.status(403).send('No user with that email is registered');
+  }
+
+  if (user.password !== password) {
+    return res.status(403).send('Wrong password. Please try again.')
+  }
+  
+  res.cookie('user_id', user['id']);
+  
   res.redirect('/urls');
 });
 
@@ -144,7 +168,7 @@ app.post('/register', (req, res) => {
   }
 
   users[user_id] = {
-    user_id,
+    id : user_id,
     email,
     password
   }
