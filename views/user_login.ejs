@@ -11,7 +11,7 @@
 <body>
   <%- include('partials/_header') %>
 
-	<div class="container" style="width: 50%;">
+	<div class="container" style="width: 50%; margin-top: 5em;">
 		<h2>Login</h2>
 		<form method="POST" action="/login">
 			<div class="form-group">
@@ -22,6 +22,7 @@
 				<label for="password">Password</label>
 				<input type="password" name="password" placeholder="Password" class="form-control" required>
 			</div>
+            <p>Don't have an account? <a href="/register">Register here</a></p>
 			<input type="submit" value="Login" class="btn btn-primary">
 			</form>
 	</div>
