@@ -16,7 +16,7 @@ const generateRandomString = () => {
         return user;
       }
     }
-    return null;
+    return undefined;
   };
   
   const urlsForUser = (user, database) => {
