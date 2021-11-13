@@ -4,51 +4,16 @@ const PORT = 3000;
 const cookieSession = require('cookie-session');
 const bodyParser = require("body-parser");
 const bcrypt = require('bcryptjs');
+const { generateRandomString, checkForUserByEmail, urlsForUser } = require('./helpers');
 
 app.set('view engine', 'ejs');
+app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieSession({
   name: 'session',
   keys: ['key1', 'key2'],
   maxAge: 24 * 60 * 60 * 1000
 }));
-app.use(bodyParser.urlencoded({extended: true}));
 
-
-/* 
-HELPER FUNCTIONS
-------------------------------------------- 
-*/
-
-const generateRandomString = () => {
-  const possibleCharsStr = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  const charArr = possibleCharsStr.split('');
-  let randomString = '';
-	
-  for (let i = 0; i <= 6; i++) {
-    randomString += charArr[Math.floor(Math.random() * charArr.length)];
-  }
-  return randomString;
-};
-
-const checkForUserByEmail = email => {
-  for (const userId in users) {
-    const user = users[userId];
-    if(user.email === email) {
-      return user;
-    }
-  }
-  return null;
-};
-
-const urlsForUser = (user, data) => {
-  const userURLs = {};
-  for (let url in data) {
-    if (user.id === data[url].userId) {
-      userURLs[url] = data[url];
-    }
-  }
-  return userURLs;
-};
 
 /* 
 DATA
@@ -215,7 +180,7 @@ app.post('/login', (req, res) => {
     return res.status(400).send('email and password cannot be blank');
   }
   
-  const user = checkForUserByEmail(email);
+  const user = checkForUserByEmail(email, users);
   if (!user) {
     return res.status(403).send('No user with that email is registered');
   }
@@ -241,7 +206,7 @@ app.post('/register', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const hashedPassword = bcrypt.hashSync(password, 10)
-  const user = checkForUserByEmail(email);
+  const user = checkForUserByEmail(email, users);
 
   if (!email || !password) {
    return res.status(400).send('email and password cannot be blank');
