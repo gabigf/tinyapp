@@ -35,12 +35,12 @@ const users = {
   "userRandomID": {
     id: "userRandomID", 
     email: "mario@email.com", 
-    password: "peach"
+    password: bcrypt.hashSync("peach", 10)
   },
  "user2RandomID": {
     id: "user2RandomID", 
     email: "user2@example.com", 
-    password: "1234"
+    password: bcrypt.hashSync("1234", 10)
   }
 }
 
@@ -154,7 +154,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
     delete urlDatabase[shortURL];
     return res.redirect('/urls');
   }
-  return res.status(400).send('You cannot perform this action!');
+  res.status(400).send('You cannot perform this action!');
 });
 
 // Edits a URL from urlDatabase
@@ -162,12 +162,15 @@ app.post('/urls/:shortURL/edit', (req, res) => {
   const user = users[req.session.user_id];
   const shortURL = req.params.shortURL;
   const newURL = req.body['new-url'];
+  if (!user) {
+    return res.status(400).send('You must be logged in to make changes');
+  }
   if (user.id === urlDatabase[shortURL].userId) {
     if (!newURL) {
       return res.status(400).send('You cannot leave the input blank. Please try again.');
     }
     urlDatabase[shortURL].longURL = newURL;
-   return res.redirect(`/urls`);
+    return res.redirect(`/urls`);
   }
   res.status(400).send('You cannot perform this action!');
 });
@@ -176,22 +179,20 @@ app.post('/urls/:shortURL/edit', (req, res) => {
 app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
+  const user = checkForUserByEmail(email, users);
   if (!email || !password) {
     return res.status(400).send('email and password cannot be blank');
   }
-  
-  const user = checkForUserByEmail(email, users);
   if (!user) {
     return res.status(403).send('No user with that email is registered');
   }
-
-  // if (!bcrypt.compareSync(password, user.password)) {
-  //   return res.status(403).send('Wrong password. Please try again.')
-  // }
-  
-  req.session.user_id = user.id;
-  
-  res.redirect('/urls');
+  bcrypt.compare(password, user.password, (err, result) => {
+    if (!result) {
+      return res.status(403).send('Wrong password. Please try again.');
+    }
+    req.session.user_id = user.id;
+    res.redirect('/urls');  
+  });
 });
 
 // Logs the user out
@@ -207,11 +208,9 @@ app.post('/register', (req, res) => {
   const password = req.body.password;
   const hashedPassword = bcrypt.hashSync(password, 10)
   const user = checkForUserByEmail(email, users);
-
   if (!email || !password) {
    return res.status(400).send('email and password cannot be blank');
   } 
-
   if (user) {
     return res.status(400).send('This user already exists. Please log in');
   }
@@ -222,7 +221,6 @@ app.post('/register', (req, res) => {
     password: hashedPassword
   }
   req.session.user_id = users[user_id]['id'];
-  
   res.redirect('/urls');
 });
 
