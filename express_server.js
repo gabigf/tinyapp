@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const PORT = 3000;
+const PORT = 3008;
 const cookieSession = require('cookie-session');
 const bodyParser = require("body-parser");
 const bcrypt = require('bcryptjs');
@@ -88,11 +88,20 @@ app.get('/urls/new', (req, res) => {
 // Page for specific URL
 app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
+  
+  if (!urlDatabase.hasOwnProperty(shortURL)) {
+    return res.status(400).send('Please type a valid url');
+  }
+  
   const longURL = urlDatabase[shortURL].longURL;
+  const user = users[req.session.user_id];
+  const userURLs = urlsForUser(user, urlDatabase);
+  
   const templateVars = { 
     shortURL,
     longURL,
-    user: users[req.session.user_id]
+    user,
+    userURLs
     };
   res.render("urls_show", templateVars);
 });
@@ -100,8 +109,12 @@ app.get("/urls/:shortURL", (req, res) => {
 // Leads to website stored in LongURL
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
+
+  if (!urlDatabase[shortURL]) {
+    return res.status(400).send('Please go back and ask for a valid URL.')
+  }
+
   const longURL = urlDatabase[shortURL].longURL;
-  
   res.redirect(longURL);
 });
 

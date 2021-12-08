@@ -3,18 +3,20 @@
 <head>
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
-  <title>URL - TinyApp Example</title>
+  <title>URL - TinyApp Exampe</title>
 </head>
 
 <body>
     <%- include('partials/_header') %>
   <div class="card text-center">
+    <% if (user && userURLs.hasOwnProperty(shortURL)) { %>
       <div class="card-header"></div>
       <div class="card-body">
         <h5 class="card-title">TinyURL for: <%= longURL %></h5>
         <p class="card-text">Short URL: <a href="/u/<%= shortURL %>"><%= shortURL %></a></p>
       </div>
-    <% if (user) { %>
+      <%= console.log(user) %>
+      <%= console.log(userURLs.hasOwnProperty(shortURL)) %>
       <div class="card-footer text-muted">
         <h2>Edit</h2>
         <form method="POST" action="/urls/<%= shortURL %>/edit">
@@ -23,6 +25,8 @@
           <input type="submit" value="Submit" class="btn btn-primary">
         </form>
       </div>
+    <% }  else { %>
+      <p>You need to be logged in as the owner of this tiny URL in order to be here.</p>
     <% } %>
   </div>
   <!-- Bootstrap JS -->
