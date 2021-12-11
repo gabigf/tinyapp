@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const PORT = 3008;
+const PORT = 3000;
 const cookieSession = require('cookie-session');
 const bodyParser = require("body-parser");
 const bcrypt = require('bcryptjs');
@@ -93,9 +93,14 @@ app.get("/urls/:shortURL", (req, res) => {
     return res.status(400).send('Please type a valid url');
   }
   
+  if (!req.session.user_id) {
+    return res.status(400).send('Please login to view urls');
+  }
+  
   const longURL = urlDatabase[shortURL].longURL;
   const user = users[req.session.user_id];
   const userURLs = urlsForUser(user, urlDatabase);
+
   
   const templateVars = { 
     shortURL,
